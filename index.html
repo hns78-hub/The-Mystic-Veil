@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Mystic Veil | Professional Tarot Reading Service</title>
+    <meta name="description"
+        content="Seek guidance on relationships, career, and personal growth. Draw your cards and receive a personalized professional tarot interpretation.">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap"
+        rel="stylesheet">
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <header>
+            <div class="animate-fade-in">
+                <h1>The Mystic Veil</h1>
+                <p class="subtitle">Personal Readings From the Void</p>
+            </div>
+        </header>
+
+        <main class="dashboard-container">
+            <!-- STEP 1: Question -->
+            <section id="question-section" class="glass-panel animate-fade-in">
+                <div class="ritual-focus">
+                    <p style="margin-bottom: 2rem; color: var(--color-lavender); font-size: 1.1rem;">Center your mind.
+                        Focus on your intent. What does the universe need to reveal to you today?</p>
+                    <div class="form-group">
+                        <textarea id="user-question" name="question" placeholder="Enter your question here..." rows="4"
+                            required></textarea>
+                    </div>
+                    <button id="start-reading" class="btn-primary" style="margin-top: 2rem;">Begin the Ritual</button>
+                </div>
+            </section>
+
+            <!-- STEP 2: Tarot Reading -->
+            <section id="tarot-section" class="glass-panel hidden animate-fade-in">
+                <!-- Audio Elements -->
+                <audio id="sound-pick" src="https://assets.mixkit.co/active_storage/sfx/2012/2012-preview.mp3"
+                    preload="auto"></audio>
+                <audio id="sound-magic" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3"
+                    preload="auto"></audio>
+
+                <div class="ritual-focus">
+                    <h2 id="draw-instruction"
+                        style="font-family: 'Playfair Display', serif; color: var(--color-gold); margin-bottom: 0.5rem;">
+                        The Arcana Fates</h2>
+                    <p id="deck-status" style="color: var(--color-lavender); margin-bottom: 2rem;">Select 4 cards from
+                        the sacred fan, or prepare the energies first.</p>
+                </div>
+
+                <!-- NEW: Reversal Step (Optional) -->
+                <div id="reversal-container" style="text-align: center; margin-bottom: 2rem;">
+                    <button id="reverse-cards-btn" class="btn-primary"
+                        style="background: transparent; border: 1.5px solid var(--color-gold); color: var(--color-gold); font-size: 0.8rem; padding: 0.8rem 2rem;">Reverse
+                        15 Cards (Optional)</button>
+                    <div id="reversal-status"
+                        style="margin-top: 1rem; font-style: italic; font-size: 0.85rem; color: var(--color-gold); display: none;">
+                        The shadows have been woven into the light.</div>
+                </div>
+
+                <!-- fanned deck (Now visible immediately) -->
+                <div id="fan-container" class="fan-container">
+                    <!-- Cards will be injected by script.js -->
+                </div>
+
+                <div class="tarot-spread">
+                    <div class="slot-container" id="slot-1">
+                        <span class="slot-title">Past</span>
+                        <div class="card-placeholder"></div>
+                    </div>
+                    <div class="slot-container" id="slot-2">
+                        <span class="slot-title">Present</span>
+                        <div class="card-placeholder"></div>
+                    </div>
+                    <div class="slot-container" id="slot-3">
+                        <span class="slot-title">Future</span>
+                        <div class="card-placeholder"></div>
+                    </div>
+                    <div class="slot-container" id="slot-4">
+                        <span class="slot-title">Advice</span>
+                        <div class="card-placeholder"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- STEP 3: Contact Info -->
+            <section id="contact-section" class="glass-panel hidden animate-fade-in">
+                <div class="ritual-focus">
+                    <h2 style="font-family: 'Playfair Display', serif; color: var(--color-gold); margin-bottom: 1rem;">
+                        Sealing the Connection</h2>
+                    <p style="margin-bottom: 2rem; color: var(--color-lavender);">The cards have spoken. Submit your
+                        details, and I will weave their meaning into a full personal reading for you.</p>
+
+                    <form id="reading-form">
+                        <!-- Honeypot -->
+                        <input type="text" name="_gotcha" style="display:none">
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                            <div class="form-group">
+                                <label for="client-name">Your Name</label>
+                                <input type="text" id="client-name" name="name" required placeholder="Name">
+                            </div>
+                            <div class="form-group">
+                                <label for="client-email">Email Address</label>
+                                <input type="email" id="client-email" name="email" required
+                                    placeholder="email@example.com">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="client-message">Extra Context (Optional)</label>
+                            <textarea id="client-message" name="message"
+                                placeholder="Is there anything else you'd like me to know?" rows="3"></textarea>
+                        </div>
+
+                        <div id="spread-summary"
+                            style="padding: 1rem; background: rgba(0,0,0,0.2); border-radius: 8px; margin-bottom: 1.5rem;">
+                            <p style="font-size: 0.8rem; text-transform: uppercase; color: var(--color-gold);">Your
+                                Casted Spread:</p>
+                            <p id="summary-text"
+                                style="font-size: 0.9rem; font-style: italic; color: var(--color-lavender);"></p>
+                        </div>
+
+                        <button type="submit" class="btn-primary" style="width: 100%;">Submit Reading to
+                            Archive</button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- STEP 4: Success Message -->
+            <section id="success-section" class="glass-panel hidden animate-fade-in" style="text-align: center;">
+                <div style="font-size: 4rem; margin-bottom: 1.5rem;">✨</div>
+                <h2 style="font-family: 'Playfair Display', serif; color: var(--color-gold); margin-bottom: 1rem;">The
+                    Ritual is Complete</h2>
+                <p style="color: var(--color-lavender); font-size: 1.1rem; line-height: 1.8; margin-bottom: 2rem;">Your
+                    reading has been safely stored in my sacred archive. I will interpret the cards and contact you via
+                    email shortly.</p>
+
+                <button id="return-home" class="btn-primary"
+                    style="background: transparent; border: 1.5px solid var(--color-gold); color: var(--color-gold); width: auto;">Begin
+                    a New Journey</button>
+
+                <div style="margin-top: 3rem; border-top: 1px solid var(--glass-border); padding-top: 2rem;">
+                    <p style="font-size: 0.9rem; opacity: 0.7;">Be patient. The universe speaks in its own time.</p>
+                </div>
+            </section>
+        </main>
+        <footer
+            style="padding: 4rem; color: var(--color-lavender); font-size: 0.8rem; text-align: center; width: 100%;">
+            <p>&copy; 2026 The Mystic Veil. All rights reserved. For spiritual guidance only.</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

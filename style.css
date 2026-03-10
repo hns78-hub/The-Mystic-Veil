@@ -1,0 +1,388 @@
+:root {
+    --color-midnight: #0a0b10;
+    --color-deep-purple: #1a0b2e;
+    --color-gold: #d4af37;
+    --color-gold-light: #f9e27c;
+    --color-lavender: #9b84b3;
+    --color-text: #e0e0e0;
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --shadow-gold: 0 0 20px rgba(212, 175, 55, 0.3);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--color-midnight);
+    color: var(--color-text);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+h1,
+h2,
+h3 {
+    font-family: 'Playfair Display', serif;
+    color: var(--color-gold);
+    letter-spacing: 2px;
+}
+
+/* Background Atmosphere */
+.app-container {
+    min-height: 100vh;
+    background: linear-gradient(rgba(10, 11, 16, 0.8), rgba(10, 11, 16, 0.9)), url('assets/bg.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+header {
+    padding: 4rem 2rem;
+    text-align: center;
+    width: 100%;
+    max-width: 800px;
+}
+
+.logo-container h1 {
+    font-size: 3.5rem;
+    text-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    font-style: italic;
+    color: var(--color-lavender);
+    font-size: 1.2rem;
+}
+
+/* Question Section */
+.section {
+    width: 100%;
+    max-width: 1000px;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: all 0.5s ease;
+}
+
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 3rem;
+    width: 100%;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+}
+
+.question-input {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--color-lavender);
+    border-radius: 10px;
+    padding: 1.5rem;
+    color: white;
+    font-size: 1.2rem;
+    font-family: 'Inter', sans-serif;
+    margin-bottom: 2rem;
+    resize: none;
+    transition: border 0.3s;
+}
+
+.question-input:focus {
+    outline: none;
+    border-color: var(--color-gold);
+    box-shadow: var(--shadow-gold);
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, var(--color-gold), var(--color-gold-light));
+    border: none;
+    padding: 1.2rem 3rem;
+    border-radius: 50px;
+    color: var(--color-midnight);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+    font-size: 1rem;
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(212, 175, 55, 0.4);
+}
+
+/* Tarot Table Section */
+/* Fan Deck Section */
+.fan-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem 0;
+    margin: 2rem auto;
+    width: 100%;
+    max-width: 900px;
+    height: 250px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    /* Hide scrollbar for Firefox */
+}
+
+.fan-container::-webkit-scrollbar {
+    display: none;
+    /* Hide scrollbar for Chrome/Safari */
+}
+
+.fan-card {
+    width: 120px;
+    height: 200px;
+    background: url('assets/card_back.png') center/cover;
+    border-radius: 8px;
+    border: 1.5px solid var(--color-gold);
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+    transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.4s ease, margin 0.4s ease;
+    flex-shrink: 0;
+    margin-left: -70px;
+    /* Overlap */
+    position: relative;
+    z-index: 1;
+}
+
+/* Reversed Card State */
+.is-reversed .tarot-card-img {
+    transform: rotate(180deg);
+}
+
+.is-reversed .card-title::after {
+    content: ' (Reversed)';
+    font-size: 0.6rem;
+    opacity: 0.7;
+    font-style: italic;
+}
+
+.fan-card:first-child {
+    margin-left: 0;
+}
+
+.fan-card:hover {
+    transform: translateY(-35px) scale(1.05);
+    z-index: 100 !important;
+    box-shadow: 0 15px 40px rgba(212, 175, 55, 0.5);
+    border-color: var(--color-gold-light);
+}
+
+.fan-card:active {
+    transform: scale(0.95);
+}
+
+/* Hide the old deck if still present */
+.deck-container {
+    display: none;
+}
+
+/* Spread Grid */
+.tarot-spread {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin: 3rem 0;
+    flex-wrap: nowrap;
+    /* Forces row format */
+}
+
+.slot-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    min-width: 150px;
+}
+
+.slot-label {
+    text-transform: uppercase;
+    color: var(--color-lavender);
+    font-size: 0.9rem;
+    letter-spacing: 3px;
+}
+
+.card-placeholder {
+    width: 180px;
+    height: 300px;
+    border: 1px dashed var(--color-lavender);
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--color-lavender);
+    font-style: italic;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+/* Interactive Card Style */
+.card {
+    width: 180px;
+    height: 300px;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    cursor: pointer;
+}
+
+.card.flipped {
+    transform: rotateY(180deg);
+}
+
+.card-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 12px;
+    border: 2px solid var(--color-gold);
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.card-back {
+    background: url('assets/card_back.png') center/cover;
+}
+
+.card-front {
+    background: #f8f8f8;
+    transform: rotateY(180deg);
+    display: flex;
+    flex-direction: column;
+    color: #1a0b2e;
+}
+
+.card-image-container {
+    width: 100%;
+    height: 70%;
+    overflow: hidden;
+    background: #ddd;
+}
+
+.tarot-card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.card:hover .tarot-card-img {
+    transform: scale(1.05);
+}
+
+.card-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 0.5rem;
+    text-align: center;
+    background: linear-gradient(to bottom, #ffffff, #f0f0f0);
+    border-top: 1px solid var(--color-gold);
+}
+
+.card-front .card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 2px;
+    color: var(--color-deep-purple);
+}
+
+.card.flipped {
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+}
+
+/* Contact Form */
+.contact-section {
+    margin-top: 4rem;
+    width: 100%;
+    display: none;
+    /* Initially hidden until cards are drawn */
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--color-lavender);
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    padding: 1rem;
+    color: white;
+}
+
+.form-group input:focus {
+    border-color: var(--color-gold);
+    outline: none;
+}
+
+/* Utilities */
+.hidden {
+    display: none !important;
+}
+
+.fade-in {
+    animation: fadeIn 1s forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .logo-container h1 {
+        font-size: 2.5rem;
+    }
+
+    .glass-panel {
+        padding: 1.5rem;
+    }
+
+    .spread-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .spread-grid {
+        grid-template-columns: 1fr;
+    }
+}
