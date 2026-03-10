@@ -156,6 +156,23 @@ reverseBtn.addEventListener('click', () => {
     reverseBtn.disabled = true;
     document.getElementById('reversal-status').style.display = 'block';
 
+    // Fade out ritual music and then hide container
+    const fadeOutDuration = 1000; // milliseconds
+    const initialVolume = soundMagic.volume;
+    const fadeInterval = 50; // milliseconds
+    let currentVolume = initialVolume;
+
+    const fadeAudio = setInterval(() => {
+        if (currentVolume > 0.05) { // Keep fading until very low
+            currentVolume -= (initialVolume / (fadeOutDuration / fadeInterval));
+            soundMagic.volume = Math.max(0, currentVolume);
+        } else {
+            clearInterval(fadeAudio);
+            soundMagic.pause();
+            soundMagic.volume = initialVolume; // Reset volume for next play
+        }
+    }, fadeInterval);
+
     setTimeout(() => {
         reversalContainer.style.opacity = '0';
         setTimeout(() => {
@@ -180,6 +197,7 @@ function drawNextCard(clickedEl) {
     if (drawnCards.length >= 4) return;
 
     // Play pick sound
+    soundPick.volume = 0.4;
     soundPick.currentTime = 0;
     soundPick.play();
 
