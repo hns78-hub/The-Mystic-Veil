@@ -240,39 +240,66 @@ function drawCardFromDeck(index, cardEl) {
     const slot = document.getElementById(`slot-${slotIndex}`);
     const placeholder = slot.querySelector('.card-placeholder');
 
-    // Create Card element
-    const cardElFront = document.createElement('div');
-    cardElFront.className = `card fade-in ${cardData.isReversed ? 'is-reversed' : ''}`;
-    cardElFront.innerHTML = `
-        <div class="card-face card-back"></div>
-        <div class="card-face card-front">
-            <div class="card-image-container">
-                <img src="${IMAGE_BASE_URL}${cardData.image}" alt="${cardData.name}" class="tarot-card-img" onerror="this.src='https://via.placeholder.com/180x300?text=Card+Back'">
-            </div>
-            <div class="card-info">
-                <div class="card-title">${cardData.name}</div>
-                <div style="font-size: 0.6rem; color: #666; max-width: 90%; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${cardData.keywords}</div>
-            </div>
-        </div>
-    `;
+    const sourceRect = cardEl.getBoundingClientRect();
+    const destRect = placeholder.getBoundingClientRect();
 
-    placeholder.replaceWith(cardElFront);
+    const flyingCard = document.createElement('div');
+    flyingCard.className = 'flying-card';
+    flyingCard.style.left = `${sourceRect.left}px`;
+    flyingCard.style.top = `${sourceRect.top}px`;
+    flyingCard.style.width = `${sourceRect.width}px`;
+    flyingCard.style.height = `${sourceRect.height}px`;
+    document.body.appendChild(flyingCard);
 
-    // Animate flip quickly
+    const deltaX = destRect.left - sourceRect.left;
+    const deltaY = destRect.top - sourceRect.top;
+    const scaleX = destRect.width / sourceRect.width;
+    const scaleY = destRect.height / sourceRect.height;
+
+    // Force reflow
+    flyingCard.offsetHeight; 
+
+    // Animate
+    flyingCard.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(${scaleX}, ${scaleY})`;
+
+    // Wait for animation to finish before placing the real card
     setTimeout(() => {
-        cardElFront.classList.add('flipped');
-    }, 50);
+        flyingCard.remove();
 
-    if (drawnCards.length === 4) {
-        document.getElementById('draw-instruction').innerText = "The Spread is Complete";
-        document.getElementById('deck-status').innerText = "Review your cards, then proceed to submission.";
-        ritualDeckGrid.style.pointerEvents = 'none';
-        ritualDeckGrid.style.opacity = '0.5';
+        // Create Card element
+        const cardElFront = document.createElement('div');
+        cardElFront.className = `card fade-in ${cardData.isReversed ? 'is-reversed' : ''}`;
+        cardElFront.innerHTML = `
+            <div class="card-face card-back"></div>
+            <div class="card-face card-front">
+                <div class="card-image-container">
+                    <img src="${IMAGE_BASE_URL}${cardData.image}" alt="${cardData.name}" class="tarot-card-img" onerror="this.src='https://via.placeholder.com/180x300?text=Card+Back'">
+                </div>
+                <div class="card-info">
+                    <div class="card-title">${cardData.name}</div>
+                    <div style="font-size: 0.6rem; color: #666; max-width: 90%; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${cardData.keywords}</div>
+                </div>
+            </div>
+        `;
 
-        setTimeout(showContactForm, 1000);
-    } else {
-        document.getElementById('deck-status').innerText = `Select ${4 - drawnCards.length} more cards from the ritual board.`;
-    }
+        placeholder.replaceWith(cardElFront);
+
+        // Animate flip quickly
+        setTimeout(() => {
+            cardElFront.classList.add('flipped');
+        }, 50);
+
+        if (drawnCards.length === 4) {
+            document.getElementById('draw-instruction').innerText = "The Spread is Complete";
+            document.getElementById('deck-status').innerText = "Review your cards, then proceed to submission.";
+            ritualDeckGrid.style.pointerEvents = 'none';
+            ritualDeckGrid.style.opacity = '0.5';
+
+            setTimeout(showContactForm, 1000);
+        } else {
+            document.getElementById('deck-status').innerText = `Select ${4 - drawnCards.length} more cards from the ritual board.`;
+        }
+    }, 600);
 }
 
 function showContactForm() {
