@@ -266,23 +266,34 @@ function drawCardFromDeck(index, cardEl) {
     setTimeout(() => {
         flyingCard.remove();
 
-        // Create Card element
+        // Create Card element and labels container
+        const slotContent = document.createElement('div');
+        slotContent.style.display = 'flex';
+        slotContent.style.flexDirection = 'column';
+        slotContent.style.alignItems = 'center';
+        slotContent.style.gap = '1rem';
+        slotContent.style.width = '100%';
+
         const cardElFront = document.createElement('div');
         cardElFront.className = `card fade-in ${cardData.isReversed ? 'is-reversed' : ''}`;
         cardElFront.innerHTML = `
             <div class="card-face card-back"></div>
-            <div class="card-face card-front">
-                <div class="card-image-container">
-                    <img src="${IMAGE_BASE_URL}${cardData.image}" alt="${cardData.name}" class="tarot-card-img" onerror="this.src='https://via.placeholder.com/180x300?text=Card+Back'">
-                </div>
-                <div class="card-info">
-                    <div class="card-title">${cardData.name}</div>
-                    <div style="font-size: 0.6rem; color: #666; max-width: 90%; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${cardData.keywords}</div>
-                </div>
+            <div class="card-face card-front" style="background: transparent; border: none; padding: 0;">
+                <img src="${IMAGE_BASE_URL}${cardData.image}" alt="${cardData.name}" class="tarot-card-img" style="width: 100%; height: 100%; border-radius: 10px; border: 2px solid var(--color-gold); object-fit: cover;" onerror="this.src='https://via.placeholder.com/180x300?text=Card+Back'">
             </div>
         `;
 
-        placeholder.replaceWith(cardElFront);
+        const labels = document.createElement('div');
+        labels.style.textAlign = 'center';
+        labels.innerHTML = `
+            <div style="color: var(--color-gold); font-weight: bold; margin-bottom: 0.3rem;">${cardData.name}</div>
+            <div style="color: var(--color-lavender); font-size: 0.9rem;">${spreadPositions[slotIndex - 1]}</div>
+        `;
+
+        slotContent.appendChild(cardElFront);
+        slotContent.appendChild(labels);
+
+        placeholder.replaceWith(slotContent);
 
         // Animate flip quickly
         setTimeout(() => {
@@ -306,9 +317,29 @@ function showContactForm() {
     contactSection.classList.remove('hidden');
     contactSection.scrollIntoView({ behavior: 'smooth' });
 
-    // Prepare summary
-    const summary = drawnCards.map((c, i) => `${spreadPositions[i]}: ${c.name}`).join(' | ');
-    summaryText.innerText = summary;
+    // Prepare summary with visuals
+    const summaryVisuals = document.createElement('div');
+    summaryVisuals.style.display = 'grid';
+    summaryVisuals.style.gridTemplateColumns = 'repeat(4, 1fr)';
+    summaryVisuals.style.gap = '1rem';
+    summaryVisuals.style.marginTop = '1rem';
+
+    drawnCards.forEach((c, i) => {
+        const div = document.createElement('div');
+        div.style.textAlign = 'center';
+        div.innerHTML = `
+            <img src="${IMAGE_BASE_URL}${c.image}" style="width: 100%; max-width: 120px; border-radius: 8px; border: 1.5px solid var(--color-gold); ${c.isReversed ? 'transform: rotate(180deg);' : ''}" onerror="this.src='https://via.placeholder.com/120x200?text=Card'">
+            <div style="color: var(--color-gold); font-weight: bold; font-size: 0.8rem; margin-top: 0.5rem;">${c.name}</div>
+            <div style="color: var(--color-lavender); font-size: 0.7rem;">${spreadPositions[i]}</div>
+        `;
+        summaryVisuals.appendChild(div);
+    });
+
+    const spreadSummary = document.getElementById('spread-summary');
+    spreadSummary.innerHTML = `
+        <p style="font-size: 0.8rem; text-transform: uppercase; color: var(--color-gold);">Your Casted Spread:</p>
+    `;
+    spreadSummary.appendChild(summaryVisuals);
 }
 
 // Form Submission Integration
