@@ -106,11 +106,13 @@ const questionSection = document.getElementById('question-section');
 const tarotSection = document.getElementById('tarot-section');
 const contactSection = document.getElementById('contact-section');
 const successSection = document.getElementById('success-section');
-const fanContainer = document.getElementById('fan-container');
-const reversalContainer = document.getElementById('reversal-container');
-const reverseBtn = document.getElementById('reverse-cards-btn');
+const ritualDeckGrid = document.getElementById('ritual-deck-grid');
+const shuffleContainer = document.getElementById('shuffle-container');
+const shuffleDeckBtn = document.getElementById('shuffle-deck-btn');
+const shuffleStatus = document.getElementById('shuffle-status');
 const soundPick = document.getElementById('sound-pick');
 const soundMagic = document.getElementById('sound-magic');
+const soundShuffle = document.getElementById('sound-shuffle');
 
 const startBtn = document.getElementById('start-reading');
 const questionInput = document.getElementById('user-question');
@@ -127,86 +129,111 @@ startBtn.addEventListener('click', () => {
     questionSection.classList.add('hidden');
     tarotSection.classList.remove('hidden');
 
-    // Prepare deck and show fan immediately
-    shuffledDeck = [...tarotDeck].sort(() => Math.random() - 0.5);
+    // Prepare deck sliced to exactly 72 cards
+    shuffledDeck = [...tarotDeck].sort(() => Math.random() - 0.5).slice(0, 72);
     shuffledDeck.forEach(c => c.isReversed = false);
-    populateFan();
-    document.getElementById('deck-status').innerText = "Pick 4 cards from the ritual fan to reveal your path.";
-    fanContainer.style.display = 'flex'; // Ensure fan is visible
-    fanContainer.style.opacity = '1'; // Ensure fan is visible
+    populateDeckGrid();
+    document.getElementById('deck-status').innerText = "Pick 4 cards from the ritual board to reveal your path.";
+    ritualDeckGrid.style.display = 'grid'; // Ensure grid is visible
+    ritualDeckGrid.style.opacity = '1'; // Ensure grid is visible
 });
 
-// Logic for Reversing 15 Cards (Optional)
-reverseBtn.addEventListener('click', () => {
-    // Pick 15 random indices to reverse
-    const indices = [];
-    while (indices.length < 15) {
-        let r = Math.floor(Math.random() * shuffledDeck.length);
-        if (indices.indexOf(r) === -1) indices.push(r);
+// Shuffling Logic
+let isShufflingInProgress = false;
+
+shuffleDeckBtn.addEventListener('click', () => {
+    if (isShufflingInProgress) return;
+    isShufflingInProgress = true;
+
+    // Play shuffle sound
+    if (soundShuffle) {
+        soundShuffle.volume = 0.6;
+        soundShuffle.currentTime = 0;
+        soundShuffle.play();
     }
 
-    indices.forEach(i => shuffledDeck[i].isReversed = true);
+    // Disable UI
+    shuffleDeckBtn.disabled = true;
+    shuffleDeckBtn.style.opacity = '0.5';
+    shuffleStatus.style.display = 'block';
+    ritualDeckGrid.style.pointerEvents = 'none';
 
-    // Play ritual sound
-    soundMagic.currentTime = 0;
-    soundMagic.play();
+    const cards = ritualDeckGrid.querySelectorAll('.ritual-card');
+    const parentRect = ritualDeckGrid.getBoundingClientRect();
+    const centerX = parentRect.width / 2;
+    const centerY = parentRect.height / 2;
 
-    // UI Feedback: Fade out the button area
-    reverseBtn.style.opacity = '0.5';
-    reverseBtn.disabled = true;
-    document.getElementById('reversal-status').style.display = 'block';
+    cards.forEach(card => {
+        const cardRect = card.getBoundingClientRect();
+        // Calculate current position of card relative to grid container
+        const currentX = (cardRect.left + cardRect.width / 2) - parentRect.left;
+        const currentY = (cardRect.top + cardRect.height / 2) - parentRect.top;
 
-    // Fade out ritual music and then hide container
-    const fadeOutDuration = 1000; // milliseconds
-    const initialVolume = soundMagic.volume;
-    const fadeInterval = 50; // milliseconds
-    let currentVolume = initialVolume;
+        // Determine translate vector to center of container
+        const tx = centerX - currentX;
+        const translateY = centerY - currentY;
 
-    const fadeAudio = setInterval(() => {
-        if (currentVolume > 0.05) { // Keep fading until very low
-            currentVolume -= (initialVolume / (fadeOutDuration / fadeInterval));
-            soundMagic.volume = Math.max(0, currentVolume);
-        } else {
-            clearInterval(fadeAudio);
-            soundMagic.pause();
-            soundMagic.volume = initialVolume; // Reset volume for next play
-        }
-    }, fadeInterval);
+        card.style.setProperty('--tx', `${tx}px`);
+        card.style.setProperty('--ty', `${translateY}px`);
+        card.classList.add('shuffling');
+    });
 
+    // Wait for the animation to finish (1.5 seconds)
     setTimeout(() => {
-        reversalContainer.style.opacity = '0';
-        setTimeout(() => {
-            reversalContainer.style.display = 'none';
-        }, 500);
-    }, 1200);
+        // Shuffle the sequence again
+        shuffledDeck.sort(() => Math.random() - 0.5);
+        // Apply random reversal (approx 25% chance)
+        shuffledDeck.forEach(c => {
+            c.isReversed = Math.random() < 0.25;
+        });
+
+        // Re-populate the board
+        populateDeckGrid();
+
+        // Restore interactions
+        isShufflingInProgress = false;
+        shuffleDeckBtn.disabled = false;
+        shuffleDeckBtn.style.opacity = '1';
+        shuffleStatus.style.display = 'none';
+        ritualDeckGrid.style.pointerEvents = 'auto';
+
+        document.getElementById('deck-status').innerText = "The deck has been charged with your energy. Draw 4 cards.";
+    }, 1500);
 });
 
-function populateFan() {
-    fanContainer.innerHTML = '';
-    // Show 25 cards in the fan for a good visual overlap
-    for (let i = 0; i < 25; i++) {
+
+function populateDeckGrid() {
+    ritualDeckGrid.innerHTML = '';
+    for (let i = 0; i < shuffledDeck.length; i++) {
         const card = document.createElement('div');
-        card.className = 'fan-card';
-        card.style.zIndex = i;
-        card.addEventListener('click', (e) => drawNextCard(e.target));
-        fanContainer.appendChild(card);
+        card.className = 'ritual-card';
+        card.dataset.index = i;
+
+        card.addEventListener('click', (e) => {
+            const targetCard = e.currentTarget;
+            const idx = parseInt(targetCard.dataset.index);
+            drawCardFromDeck(idx, targetCard);
+        });
+
+        ritualDeckGrid.appendChild(card);
     }
 }
 
-function drawNextCard(clickedEl) {
+function drawCardFromDeck(index, cardEl) {
     if (drawnCards.length >= 4) return;
+    if (cardEl.classList.contains('drawn')) return;
 
     // Play pick sound
-    soundPick.volume = 0.4;
-    soundPick.currentTime = 0;
-    soundPick.play();
+    if (soundPick) {
+        soundPick.volume = 0.4;
+        soundPick.currentTime = 0;
+        soundPick.play();
+    }
 
-    // Remove the clicked element from the fan
-    clickedEl.style.transform = 'translateY(-150px) scale(0) rotate(15deg)';
-    clickedEl.style.opacity = '0';
-    setTimeout(() => clickedEl.remove(), 400);
+    // Mark card as drawn
+    cardEl.classList.add('drawn');
 
-    const cardData = shuffledDeck.pop();
+    const cardData = shuffledDeck[index];
     drawnCards.push(cardData);
 
     const slotIndex = drawnCards.length;
@@ -214,9 +241,9 @@ function drawNextCard(clickedEl) {
     const placeholder = slot.querySelector('.card-placeholder');
 
     // Create Card element
-    const cardEl = document.createElement('div');
-    cardEl.className = `card fade-in ${cardData.isReversed ? 'is-reversed' : ''}`;
-    cardEl.innerHTML = `
+    const cardElFront = document.createElement('div');
+    cardElFront.className = `card fade-in ${cardData.isReversed ? 'is-reversed' : ''}`;
+    cardElFront.innerHTML = `
         <div class="card-face card-back"></div>
         <div class="card-face card-front">
             <div class="card-image-container">
@@ -224,28 +251,27 @@ function drawNextCard(clickedEl) {
             </div>
             <div class="card-info">
                 <div class="card-title">${cardData.name}</div>
-                <div style="font-size: 0.6rem; color: #666;">${cardData.keywords}</div>
-                <div style="font-size: 0.7rem; font-weight: bold; color: #d4af37; margin-top: 5px;">${spreadPositions[slotIndex - 1]}</div>
+                <div style="font-size: 0.6rem; color: #666; max-width: 90%; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${cardData.keywords}</div>
             </div>
         </div>
     `;
 
-    placeholder.replaceWith(cardEl);
+    placeholder.replaceWith(cardElFront);
 
     // Animate flip quickly
     setTimeout(() => {
-        cardEl.classList.add('flipped');
+        cardElFront.classList.add('flipped');
     }, 50);
 
     if (drawnCards.length === 4) {
         document.getElementById('draw-instruction').innerText = "The Spread is Complete";
         document.getElementById('deck-status').innerText = "Review your cards, then proceed to submission.";
-        fanContainer.style.pointerEvents = 'none';
-        fanContainer.style.opacity = '0.3';
+        ritualDeckGrid.style.pointerEvents = 'none';
+        ritualDeckGrid.style.opacity = '0.5';
 
         setTimeout(showContactForm, 1000);
     } else {
-        document.getElementById('deck-status').innerText = `Select ${4 - drawnCards.length} more cards from the ritual fan.`;
+        document.getElementById('deck-status').innerText = `Select ${4 - drawnCards.length} more cards from the ritual board.`;
     }
 }
 
@@ -274,11 +300,12 @@ readingForm.addEventListener('submit', async (e) => {
     const message = document.getElementById('client-message').value;
     const question = questionInput.value;
 
-    // Prepare spread data for Supabase
+    // Prepare spread data for Supabase, including is_reversed
     const spreadData = drawnCards.map((c, i) => ({
         position: spreadPositions[i],
         name: c.name,
-        image_url: `${IMAGE_BASE_URL}${c.image}`
+        image_url: `${IMAGE_BASE_URL}${c.image}`,
+        is_reversed: c.isReversed
     }));
 
     try {
@@ -350,26 +377,25 @@ document.getElementById('return-home').addEventListener('click', () => {
     document.getElementById('client-message').value = "";
 
     // Restore instructions
-    document.getElementById('draw-instruction').innerText = "The Arcana Fates";
-    document.getElementById('deck-status').innerText = "Select 4 cards from the ritual fan, or prepare the energies first.";
+    document.getElementById('draw-instruction').innerText = "";
+    document.getElementById('deck-status').innerText = "Select 4 cards from the sacred deck, or prepare the energies first.";
 
-    // Reset Reversal UI
-    reversalContainer.style.display = 'block';
-    reversalContainer.style.opacity = '1';
-    reverseBtn.style.opacity = '1';
-    reverseBtn.disabled = false;
-    document.getElementById('reversal-status').style.display = 'none';
+    // Reset Shuffle UI
+    shuffleContainer.style.display = 'block';
+    shuffleContainer.style.opacity = '1';
+    shuffleDeckBtn.style.opacity = '1';
+    shuffleDeckBtn.disabled = false;
+    shuffleStatus.style.display = 'none';
 
-    // Reset Fan UI
-    fanContainer.style.display = 'flex';
-    fanContainer.style.opacity = '1';
-    fanContainer.style.pointerEvents = 'auto';
+    // Reset Grid UI
+    ritualDeckGrid.style.display = 'grid';
+    ritualDeckGrid.style.opacity = '1';
+    ritualDeckGrid.style.pointerEvents = 'auto';
 
     // Clear the card slots
     for (let i = 1; i <= 4; i++) {
         const slot = document.getElementById(`slot-${i}`);
         slot.innerHTML = `
-            <span class="slot-title">${spreadPositions[i - 1]}</span>
             <div class="card-placeholder"></div>
         `;
     }

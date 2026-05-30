@@ -67,7 +67,7 @@
         }
         
         .status-pending { background: rgba(212, 175, 55, 0.2); color: var(--color-gold); border: 1px solid var(--color-gold); }
-        .status-done { background: rgba(0, 255, 0, 0.1); color: #00ff00; border: 1px solid #00ff00; }
+        .status-confirmed { background: rgba(0, 255, 0, 0.1); color: #00ff00; border: 1px solid #00ff00; }
         
         .reading-details {
             display: grid;
@@ -223,8 +223,8 @@
                             <div class="visual-display" style="display: flex; gap: 1rem; overflow-x: auto; padding-bottom: 1rem;">
                                 ${reading.spread.map(card => `
                                     <div class="mini-card" style="flex: 0 0 100px;">
-                                        <img src="${card.image_url}" alt="${card.name}" style="width: 100%; border-radius: 5px; border: 1.5px solid var(--color-gold);">
-                                        <p style="font-size: 0.7rem; margin-top: 5px; font-weight: bold; color: var(--color-gold);">${card.name}</p>
+                                        <img src="${card.image_url}" alt="${card.name}" style="width: 100%; border-radius: 5px; border: 1.5px solid var(--color-gold); ${card.is_reversed ? 'transform: rotate(180deg);' : ''}">
+                                        <p style="font-size: 0.7rem; margin-top: 5px; font-weight: bold; color: var(--color-gold);">${card.name}${card.is_reversed ? ' <span style="color:#ff8c00; font-size:0.6rem; font-style:italic;">(Reversed)</span>' : ''}</p>
                                         <span style="font-size: 0.6rem; color: var(--color-lavender);">${card.position}</span>
                                     </div>
                                 `).join('')}

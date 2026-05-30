@@ -125,41 +125,85 @@ header {
 }
 
 /* Tarot Table Section */
-/* Fan Deck Section */
-.fan-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 2rem 0;
-    margin: 2rem auto;
+/* Ritual Deck Grid & Cards */
+.ritual-deck-grid {
+    display: grid;
+    grid-template-columns: repeat(18, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    gap: 6px;
     width: 100%;
-    max-width: 900px;
-    height: 250px;
-    overflow-x: auto;
-    overflow-y: hidden;
-    scrollbar-width: none;
-    /* Hide scrollbar for Firefox */
-}
-
-.fan-container::-webkit-scrollbar {
-    display: none;
-    /* Hide scrollbar for Chrome/Safari */
-}
-
-.fan-card {
-    width: 120px;
-    height: 200px;
-    background: url('assets/card_back.png') center/cover;
-    border-radius: 8px;
-    border: 1.5px solid var(--color-gold);
-    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.5);
-    cursor: pointer;
-    transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.4s ease, margin 0.4s ease;
-    flex-shrink: 0;
-    margin-left: -70px;
-    /* Overlap */
+    max-width: 1100px;
+    margin: 2rem auto;
+    padding: 1.5rem;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.6), 0 8px 32px rgba(0,0,0,0.5);
     position: relative;
-    z-index: 1;
+}
+
+.ritual-card {
+    aspect-ratio: 2/3.2;
+    background: url('assets/card_back.png') center/cover;
+    border-radius: 6px;
+    border: 1.5px solid var(--color-gold);
+    cursor: pointer;
+    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    z-index: 2;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+.ritual-card:hover {
+    transform: translateY(-8px) scale(1.08);
+    z-index: 10;
+    box-shadow: 0 8px 20px rgba(212, 175, 55, 0.4);
+    border-color: var(--color-gold-light);
+}
+
+.ritual-card.drawn {
+    opacity: 0.15 !important;
+    pointer-events: none !important;
+    cursor: default;
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: none;
+}
+
+.ritual-card.shuffling {
+    animation: shuffle-physics 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+    pointer-events: none !important;
+}
+
+@keyframes shuffle-physics {
+    0% {
+        transform: translate(0, 0) rotate(0deg);
+        z-index: 5;
+    }
+    30% {
+        /* Collapse into center pile */
+        transform: translate(var(--tx), var(--ty)) rotate(10deg);
+        z-index: 15;
+    }
+    45% {
+        /* Slide pile left */
+        transform: translate(calc(var(--tx) - 30px), var(--ty)) rotate(-15deg);
+        z-index: 10;
+    }
+    60% {
+        /* Slide pile right */
+        transform: translate(calc(var(--tx) + 30px), var(--ty)) rotate(15deg);
+        z-index: 20;
+    }
+    75% {
+        /* Collapse back */
+        transform: translate(var(--tx), var(--ty)) rotate(0deg);
+        z-index: 15;
+    }
+    100% {
+        /* Return to original grid positions */
+        transform: translate(0, 0) rotate(0deg);
+        z-index: 2;
+    }
 }
 
 /* Reversed Card State */
@@ -174,19 +218,27 @@ header {
     font-style: italic;
 }
 
-.fan-card:first-child {
-    margin-left: 0;
-}
-
-.fan-card:hover {
-    transform: translateY(-35px) scale(1.05);
-    z-index: 100 !important;
-    box-shadow: 0 15px 40px rgba(212, 175, 55, 0.5);
-    border-color: var(--color-gold-light);
-}
-
-.fan-card:active {
-    transform: scale(0.95);
+/* Responsive Mobile Layout Override for 4-Row Grid */
+@media (max-width: 768px) {
+    .ritual-deck-grid {
+        display: grid;
+        grid-template-columns: none;
+        grid-template-rows: repeat(4, 80px);
+        grid-auto-flow: column;
+        grid-auto-columns: 50px;
+        gap: 6px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        white-space: nowrap;
+        scrollbar-width: none; /* Hide scrollbar for Firefox */
+        -webkit-overflow-scrolling: touch;
+        padding: 1rem;
+        max-width: 100%;
+        border-radius: 12px;
+    }
+    .ritual-deck-grid::-webkit-scrollbar {
+        display: none; /* Hide scrollbar for Chrome/Safari */
+    }
 }
 
 /* Hide the old deck if still present */
